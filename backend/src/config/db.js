@@ -1,27 +1,15 @@
-const { neon } = require('@neondatabase/serverless');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const sql = neon(process.env.DATABASE_URL);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-const query = async (text, params = []) => {
-  try {
-    const result = await sql(text, params);
-    return result;
-  } catch (error) {
-    console.error('Database query error:', error.message);
-    throw error;
-  }
-};
+pool.connect()
+  .then(() => console.log('Database connected'))
+  .catch(err => console.error('Database connection error:', err.message));
 
-const testConnection = async () => {
-  try {
-    await sql`SELECT 1`;
-    console.log('Database connected');
-    return true;
-  } catch (error) {
-    console.error('Database connection error:', error.message);
-    return false;
-  }
-};
+const query = (text, params) => pool.query(text, params);
 
-module.exports = { query, sql, testConnection };
+module.exports = { pool, query };
