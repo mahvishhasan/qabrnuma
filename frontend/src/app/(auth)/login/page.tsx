@@ -46,14 +46,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-md p-8">
+    <div className="w-full max-w-md p-6">
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-mint rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-forest font-bold text-2xl">Q</span>
+          <div className="w-14 h-14 bg-[#2D6A4F] rounded-xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">Q</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to QabrNuma</p>
+          <p className="text-gray-500 mt-1 text-sm">Sign in to QabrNuma</p>
         </div>
 
         {error && (
@@ -65,14 +65,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="label">Email</label>
             <input
               {...register('email')}
               type="email"
-              id="email"
-              className="input-field"
+              className={`input-field ${errors.email ? 'input-error' : ''}`}
               placeholder="you@example.com"
             />
             {errors.email && (
@@ -81,14 +78,11 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="label">Password</label>
             <input
               {...register('password')}
               type="password"
-              id="password"
-              className="input-field"
+              className={`input-field ${errors.password ? 'input-error' : ''}`}
               placeholder="••••••••"
             />
             {errors.password && (
@@ -105,9 +99,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="mt-6 text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-sage hover:text-forest font-medium">
+          <Link href="/register" className="text-[#2D6A4F] hover:text-[#245c43] font-medium">
             Sign up
           </Link>
         </p>

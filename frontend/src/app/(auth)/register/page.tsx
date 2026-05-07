@@ -59,14 +59,14 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-md p-8">
+    <div className="w-full max-w-md p-6">
       <div className="bg-white rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-mint rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-forest font-bold text-2xl">Q</span>
+          <div className="w-14 h-14 bg-[#2D6A4F] rounded-xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-xl">Q</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
-          <p className="text-gray-500 mt-1">Get started with QabrNuma</p>
+          <p className="text-gray-500 mt-1 text-sm">Get started with QabrNuma</p>
         </div>
 
         {error && (
@@ -78,14 +78,11 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
+            <label className="label">Full Name *</label>
             <input
               {...register('full_name')}
               type="text"
-              id="full_name"
-              className="input-field"
+              className={`input-field ${errors.full_name ? 'input-error' : ''}`}
               placeholder="Ahmed Khan"
             />
             {errors.full_name && (
@@ -94,14 +91,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label className="label">Email *</label>
             <input
               {...register('email')}
               type="email"
-              id="email"
-              className="input-field"
+              className={`input-field ${errors.email ? 'input-error' : ''}`}
               placeholder="you@example.com"
             />
             {errors.email && (
@@ -111,25 +105,19 @@ export default function RegisterPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone (optional)
-              </label>
+              <label className="label">Phone</label>
               <input
                 {...register('phone_number')}
                 type="tel"
-                id="phone_number"
                 className="input-field"
                 placeholder="03XX-XXXXXXX"
               />
             </div>
             <div>
-              <label htmlFor="cnic" className="block text-sm font-medium text-gray-700 mb-1">
-                CNIC (optional)
-              </label>
+              <label className="label">CNIC</label>
               <input
                 {...register('cnic')}
                 type="text"
-                id="cnic"
                 className="input-field"
                 placeholder="XXXXX-XXXXXXX-X"
               />
@@ -137,14 +125,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
+            <label className="label">Password *</label>
             <input
               {...register('password')}
               type="password"
-              id="password"
-              className="input-field"
+              className={`input-field ${errors.password ? 'input-error' : ''}`}
               placeholder="••••••••"
             />
             {errors.password && (
@@ -153,14 +138,11 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
+            <label className="label">Confirm Password *</label>
             <input
               {...register('confirm_password')}
               type="password"
-              id="confirm_password"
-              className="input-field"
+              className={`input-field ${errors.confirm_password ? 'input-error' : ''}`}
               placeholder="••••••••"
             />
             {errors.confirm_password && (
@@ -177,9 +159,9 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-gray-600">
+        <p className="mt-6 text-center text-sm text-gray-600">
           Already have an account?{' '}
-          <Link href="/login" className="text-sage hover:text-forest font-medium">
+          <Link href="/login" className="text-[#2D6A4F] hover:text-[#245c43] font-medium">
             Sign in
           </Link>
         </p>
