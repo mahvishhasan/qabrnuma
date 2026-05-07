@@ -3,10 +3,10 @@
 
 -- Users (password is 'password123' hashed with bcrypt)
 INSERT INTO users (full_name, email, password_hash, phone_number, cnic, role, is_active) VALUES
-('Admin User', 'admin@qabrnuma.pk', '$2a$10$8K1p/aJi5tGjLvxhI1fOqOQHs5KnvqxhHxEGqD8hxAhHR8uJKYR.e', '03001234567', '35201-1234567-1', 'admin', true),
-('Ahmed Khan', 'staff@qabrnuma.pk', '$2a$10$8K1p/aJi5tGjLvxhI1fOqOQHs5KnvqxhHxEGqD8hxAhHR8uJKYR.e', '03011234567', '35201-2345678-2', 'staff', true),
-('Fatima Ali', 'manager@qabrnuma.pk', '$2a$10$8K1p/aJi5tGjLvxhI1fOqOQHs5KnvqxhHxEGqD8hxAhHR8uJKYR.e', '03021234567', '35201-3456789-3', 'cemetery_manager', true),
-('Muhammad Usman', 'user@qabrnuma.pk', '$2a$10$8K1p/aJi5tGjLvxhI1fOqOQHs5KnvqxhHxEGqD8hxAhHR8uJKYR.e', '03031234567', '35201-4567890-4', 'user', true);
+('Admin User', 'admin@qabrnuma.pk', '$2b$10$4HLcc1vHm.RJKjA/0BkGnOE/aEjFY0wQ4dgNgzg0ByjItvmD1OCSS', '03001234567', '35201-1234567-1', 'admin', true),
+('Ahmed Khan', 'staff@qabrnuma.pk', '$2b$10$4HLcc1vHm.RJKjA/0BkGnOE/aEjFY0wQ4dgNgzg0ByjItvmD1OCSS', '03011234567', '35201-2345678-2', 'staff', true),
+('Fatima Ali', 'manager@qabrnuma.pk', '$2b$10$4HLcc1vHm.RJKjA/0BkGnOE/aEjFY0wQ4dgNgzg0ByjItvmD1OCSS', '03021234567', '35201-3456789-3', 'cemetery_manager', true),
+('Muhammad Usman', 'user@qabrnuma.pk', '$2b$10$4HLcc1vHm.RJKjA/0BkGnOE/aEjFY0wQ4dgNgzg0ByjItvmD1OCSS', '03031234567', '35201-4567890-4', 'user', true);
 
 -- Cemeteries
 INSERT INTO cemeteries (name, address, city, total_capacity, available_plots, status, type) VALUES
