@@ -5,6 +5,9 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const deathCasesRoutes = require('./routes/deathCases');
 const burialRecordsRoutes = require('./routes/burialRecords');
+const cemeteriesRoutes = require('./routes/cemeteries');
+const gravesRoutes = require('./routes/graves');
+const reservationsRoutes = require('./routes/reservations');
 
 const app = express();
 
@@ -18,6 +21,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/death-cases', deathCasesRoutes);
 app.use('/api/burial-records', burialRecordsRoutes);
+app.use('/api/cemeteries', cemeteriesRoutes);
+app.use('/api/graves', gravesRoutes);
+app.use('/api/reservations', reservationsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
