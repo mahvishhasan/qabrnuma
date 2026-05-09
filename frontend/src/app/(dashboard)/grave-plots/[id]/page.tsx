@@ -15,6 +15,7 @@ import {
 
 interface GraveDetails extends Grave {
   cemetery_type?: string;
+  image_url?: string;
   current_reservation?: {
     reservation_number: string;
     reserved_by_name: string;
@@ -106,6 +107,21 @@ export default function GravePlotDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Plot Image */}
+            <div className="rounded-xl overflow-hidden" style={{ maxHeight: '240px' }}>
+              {grave.image_url ? (
+                <img
+                  src={grave.image_url}
+                  alt={`Plot ${grave.plot_id}`}
+                  className="w-full h-60 object-cover"
+                />
+              ) : (
+                <div className="w-full h-60 bg-gradient-to-br from-[#2D6A4F] to-[#1B3A2D] flex items-center justify-center">
+                  <span className="text-white font-bold text-2xl">{grave.plot_id}</span>
+                </div>
+              )}
+            </div>
+
             {/* Header */}
             <div className="flex items-start justify-between">
               <div>

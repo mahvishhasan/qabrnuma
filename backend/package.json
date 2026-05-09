@@ -6,6 +6,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "migrate": "node src/config/migrate.js",
+    "reseed": "node src/config/migrate.js",
+    "migrate:services": "node src/config/migrate-services.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,4 +1,4 @@
-const { query } = require('../config/db');
+const { pool, query } = require('../config/db');
 
 const generateRecordNumber = async () => {
   const year = new Date().getFullYear();
@@ -18,6 +18,7 @@ const generateRecordNumber = async () => {
 };
 
 const createBurialRecord = async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
       case_id,
@@ -34,39 +35,47 @@ const createBurialRecord = async (req, res) => {
     } = req.body;
 
     if (!case_id || !grave_id) {
+      client.release();
       return res.status(400).json({ error: 'case_id and grave_id are required' });
     }
 
-    const caseResult = await query(
+    const caseResult = await client.query(
       'SELECT * FROM death_cases WHERE case_id = $1',
       [case_id]
     );
     if (caseResult.rows.length === 0) {
+      client.release();
       return res.status(404).json({ error: 'Death case not found' });
     }
 
-    const graveResult = await query(
+    const graveResult = await client.query(
       'SELECT * FROM graves WHERE grave_id = $1',
       [grave_id]
     );
     if (graveResult.rows.length === 0) {
+      client.release();
       return res.status(404).json({ error: 'Grave not found' });
     }
     if (graveResult.rows[0].status === 'occupied') {
+      client.release();
       return res.status(400).json({ error: 'Grave is already occupied' });
     }
 
-    const existingRecord = await query(
+    const existingRecord = await client.query(
       'SELECT * FROM burial_records WHERE case_id = $1',
       [case_id]
     );
     if (existingRecord.rows.length > 0) {
+      client.release();
       return res.status(400).json({ error: 'Burial record already exists for this case' });
     }
 
     const record_number = await generateRecordNumber();
+    const oldStatus = caseResult.rows[0].status;
 
-    const result = await query(
+    await client.query('BEGIN');
+
+    const result = await client.query(
       `INSERT INTO burial_records (
         record_number, case_id, grave_id, funeral_director, burial_type,
         date_of_service, officiating_clergy, religious_affiliation,
@@ -80,29 +89,40 @@ const createBurialRecord = async (req, res) => {
       ]
     );
 
-    await query(
+    await client.query(
       'UPDATE graves SET status = $1 WHERE grave_id = $2',
       ['occupied', grave_id]
     );
 
-    await query(
+    await client.query(
       'UPDATE death_cases SET status = $1, updated_at = NOW() WHERE case_id = $2',
       ['completed', case_id]
     );
 
-    await query(
+    await client.query(
       `INSERT INTO case_status_history (case_id, old_status, new_status, changed_by_user_id, notes)
-       VALUES ($1, $2, 'completed', $3, 'Burial record created')`,
-      [case_id, caseResult.rows[0].status, req.user.user_id]
+       VALUES ($1, $2, 'completed', $3, 'Auto-completed on burial record creation')`,
+      [case_id, oldStatus, req.user.user_id]
     );
+
+    await client.query(
+      `UPDATE reservations SET status = 'approved'
+       WHERE grave_id = $1 AND status NOT IN ('cancelled', 'expired', 'approved')`,
+      [grave_id]
+    );
+
+    await client.query('COMMIT');
 
     res.status(201).json({
       message: 'Burial record created successfully',
       record: result.rows[0]
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Create burial record error:', error);
     res.status(500).json({ error: 'Failed to create burial record' });
+  } finally {
+    client.release();
   }
 };
 

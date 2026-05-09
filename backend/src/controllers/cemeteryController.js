@@ -57,17 +57,17 @@ const getCemeteryById = async (req, res) => {
 
 const createCemetery = async (req, res) => {
   try {
-    const { name, address, city, total_capacity, type } = req.body;
+    const { name, address, city, state, country, postal_code, total_capacity, contact_phone, contact_email, type } = req.body;
 
     if (!name || !city) {
       return res.status(400).json({ error: 'name and city are required' });
     }
 
     const result = await query(
-      `INSERT INTO cemeteries (name, address, city, total_capacity, available_plots, type)
-       VALUES ($1, $2, $3, $4, $4, $5)
+      `INSERT INTO cemeteries (name, address, city, state, country, postal_code, total_capacity, current_occupancy, contact_phone, contact_email, type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8, $9, $10)
        RETURNING *`,
-      [name, address, city, total_capacity || 0, type || 'standard']
+      [name, address, city, state, country, postal_code, total_capacity || 0, contact_phone, contact_email, type || 'standard']
     );
 
     res.status(201).json({
@@ -83,7 +83,7 @@ const createCemetery = async (req, res) => {
 const updateCemetery = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, address, city, total_capacity, status, type } = req.body;
+    const { name, address, city, state, country, postal_code, total_capacity, contact_phone, contact_email, is_active, type } = req.body;
 
     const existingResult = await query(
       'SELECT * FROM cemeteries WHERE cemetery_id = $1',
@@ -99,12 +99,17 @@ const updateCemetery = async (req, res) => {
         name = COALESCE($1, name),
         address = COALESCE($2, address),
         city = COALESCE($3, city),
-        total_capacity = COALESCE($4, total_capacity),
-        status = COALESCE($5, status),
-        type = COALESCE($6, type)
-       WHERE cemetery_id = $7
+        state = COALESCE($4, state),
+        country = COALESCE($5, country),
+        postal_code = COALESCE($6, postal_code),
+        total_capacity = COALESCE($7, total_capacity),
+        contact_phone = COALESCE($8, contact_phone),
+        contact_email = COALESCE($9, contact_email),
+        is_active = COALESCE($10, is_active),
+        type = COALESCE($11, type)
+       WHERE cemetery_id = $12
        RETURNING *`,
-      [name, address, city, total_capacity, status, type, id]
+      [name, address, city, state, country, postal_code, total_capacity, contact_phone, contact_email, is_active, type, id]
     );
 
     res.json({

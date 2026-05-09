@@ -94,7 +94,76 @@ const login = async (req, res) => {
 };
 
 const getProfile = async (req, res) => {
-  res.json({ user: req.user });
+  try {
+    const result = await query(
+      'SELECT user_id, full_name, email, phone_number, cnic, role, created_at FROM users WHERE user_id = $1',
+      [req.user.user_id]
+    );
+    res.json({ user: result.rows[0] });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
 };
 
-module.exports = { register, login, getProfile };
+const updateProfile = async (req, res) => {
+  try {
+    const { full_name, phone_number, cnic } = req.body;
+
+    const result = await query(
+      `UPDATE users SET
+        full_name = COALESCE($1, full_name),
+        phone_number = COALESCE($2, phone_number),
+        cnic = COALESCE($3, cnic)
+       WHERE user_id = $4
+       RETURNING user_id, full_name, email, phone_number, cnic, role`,
+      [full_name, phone_number, cnic, req.user.user_id]
+    );
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+};
+
+const changePassword = async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current and new passwords are required' });
+    }
+
+    if (new_password.length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' });
+    }
+
+    const userResult = await query(
+      'SELECT password_hash FROM users WHERE user_id = $1',
+      [req.user.user_id]
+    );
+
+    const isValidPassword = await bcrypt.compare(current_password, userResult.rows[0].password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    const newHash = await bcrypt.hash(new_password, 10);
+
+    await query(
+      'UPDATE users SET password_hash = $1 WHERE user_id = $2',
+      [newHash, req.user.user_id]
+    );
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+};
+
+module.exports = { register, login, getProfile, updateProfile, changePassword };

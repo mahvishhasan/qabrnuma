@@ -1,4 +1,4 @@
-const { query } = require('../config/db');
+const { pool, query } = require('../config/db');
 
 const generateReservationNumber = async () => {
   const year = new Date().getFullYear();
@@ -18,6 +18,7 @@ const generateReservationNumber = async () => {
 };
 
 const createReservation = async (req, res) => {
+  const client = await pool.connect();
   try {
     const {
       grave_id,
@@ -29,26 +30,33 @@ const createReservation = async (req, res) => {
     } = req.body;
 
     if (!grave_id) {
+      client.release();
       return res.status(400).json({ error: 'grave_id is required' });
     }
 
-    const graveResult = await query(
-      'SELECT * FROM graves WHERE grave_id = $1',
+    await client.query('BEGIN');
+
+    const graveResult = await client.query(
+      'SELECT * FROM graves WHERE grave_id = $1 FOR UPDATE',
       [grave_id]
     );
 
     if (graveResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      client.release();
       return res.status(404).json({ error: 'Grave not found' });
     }
 
     if (graveResult.rows[0].status !== 'available') {
-      return res.status(400).json({ error: 'Grave is not available for reservation' });
+      await client.query('ROLLBACK');
+      client.release();
+      return res.status(400).json({ error: 'This plot is no longer available' });
     }
 
     const reservation_number = await generateReservationNumber();
     const expiry_date = new Date(Date.now() + 48 * 60 * 60 * 1000);
 
-    const result = await query(
+    const result = await client.query(
       `INSERT INTO reservations (
         reservation_number, grave_id, user_id, primary_contact,
         phone_number, email, reservation_purpose, holding_fee, expiry_date
@@ -62,23 +70,28 @@ const createReservation = async (req, res) => {
       ]
     );
 
-    await query(
+    await client.query(
       'UPDATE graves SET status = $1 WHERE grave_id = $2',
       ['reserved', grave_id]
     );
 
-    await query(
+    await client.query(
       'UPDATE sections SET available_plots = available_plots - 1 WHERE section_id = $1',
       [graveResult.rows[0].section_id]
     );
+
+    await client.query('COMMIT');
 
     res.status(201).json({
       message: 'Reservation created successfully',
       reservation: result.rows[0]
     });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Create reservation error:', error);
     res.status(500).json({ error: 'Failed to create reservation' });
+  } finally {
+    client.release();
   }
 };
 
@@ -169,51 +182,62 @@ const getReservationById = async (req, res) => {
 };
 
 const cancelReservation = async (req, res) => {
+  const client = await pool.connect();
   try {
     const { id } = req.params;
 
-    const result = await query(
+    const result = await client.query(
       'SELECT * FROM reservations WHERE reservation_id = $1',
       [id]
     );
 
     if (result.rows.length === 0) {
+      client.release();
       return res.status(404).json({ error: 'Reservation not found' });
     }
 
     const reservation = result.rows[0];
     const isPrivileged = ['admin', 'cemetery_manager'].includes(req.user.role);
     if (!isPrivileged && reservation.user_id !== req.user.user_id) {
+      client.release();
       return res.status(403).json({ error: 'Access denied' });
     }
 
     if (reservation.status === 'cancelled') {
+      client.release();
       return res.status(400).json({ error: 'Reservation is already cancelled' });
     }
 
-    await query(
+    await client.query('BEGIN');
+
+    await client.query(
       'UPDATE reservations SET status = $1 WHERE reservation_id = $2',
       ['cancelled', id]
     );
 
-    await query(
+    await client.query(
       'UPDATE graves SET status = $1 WHERE grave_id = $2',
       ['available', reservation.grave_id]
     );
 
-    const graveResult = await query(
+    const graveResult = await client.query(
       'SELECT section_id FROM graves WHERE grave_id = $1',
       [reservation.grave_id]
     );
-    await query(
+    await client.query(
       'UPDATE sections SET available_plots = available_plots + 1 WHERE section_id = $1',
       [graveResult.rows[0].section_id]
     );
 
+    await client.query('COMMIT');
+
     res.json({ message: 'Reservation cancelled successfully' });
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error('Cancel reservation error:', error);
     res.status(500).json({ error: 'Failed to cancel reservation' });
+  } finally {
+    client.release();
   }
 };
 
@@ -432,6 +456,52 @@ const requestAdjacentPlot = async (req, res) => {
   }
 };
 
+const checkAndExpireReservations = async () => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const expiredResult = await client.query(
+      `UPDATE reservations
+       SET status = 'expired'
+       WHERE status IN ('pending', 'approved') AND expiry_date < NOW()
+       RETURNING grave_id`
+    );
+
+    if (expiredResult.rows.length > 0) {
+      const graveIds = expiredResult.rows.map(r => r.grave_id);
+      await client.query(
+        `UPDATE graves SET status = 'available'
+         WHERE grave_id = ANY($1)`,
+        [graveIds]
+      );
+
+      const sectionResult = await client.query(
+        `SELECT section_id, COUNT(*) as count FROM graves
+         WHERE grave_id = ANY($1)
+         GROUP BY section_id`,
+        [graveIds]
+      );
+
+      for (const row of sectionResult.rows) {
+        await client.query(
+          'UPDATE sections SET available_plots = available_plots + $1 WHERE section_id = $2',
+          [parseInt(row.count), row.section_id]
+        );
+      }
+
+      console.log(`Expired ${expiredResult.rows.length} reservations`);
+    }
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
 module.exports = {
   createReservation,
   getUserReservations,
@@ -440,5 +510,6 @@ module.exports = {
   approveReservation,
   linkReservationToCase,
   createFamilyPlotGroup,
-  requestAdjacentPlot
+  requestAdjacentPlot,
+  checkAndExpireReservations
 };

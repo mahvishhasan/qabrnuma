@@ -2,26 +2,33 @@ const { query } = require('../config/db');
 
 const getAvailablePlots = async (req, res) => {
   try {
-    const { cemetery_id, section_id, plot_type, page = 1, limit = 20 } = req.query;
+    const { cemetery_id, section_id, plot_type, status = 'available', page = 1, limit = 20 } = req.query;
     const offset = (page - 1) * limit;
     const params = [];
-    let whereClause = "WHERE g.status = 'available'";
+    let whereClause = '';
     let paramIndex = 1;
 
+    whereClause = `WHERE g.status = $${paramIndex}`;
+    params.push(status);
+    paramIndex++;
+
     if (cemetery_id) {
-      whereClause += ` AND s.cemetery_id = $${paramIndex}`;
+      whereClause += whereClause ? ' AND ' : 'WHERE ';
+      whereClause += `s.cemetery_id = $${paramIndex}`;
       params.push(cemetery_id);
       paramIndex++;
     }
 
     if (section_id) {
-      whereClause += ` AND g.section_id = $${paramIndex}`;
+      whereClause += whereClause ? ' AND ' : 'WHERE ';
+      whereClause += `g.section_id = $${paramIndex}`;
       params.push(section_id);
       paramIndex++;
     }
 
     if (plot_type) {
-      whereClause += ` AND g.plot_type = $${paramIndex}`;
+      whereClause += whereClause ? ' AND ' : 'WHERE ';
+      whereClause += `g.plot_type = $${paramIndex}`;
       params.push(plot_type);
       paramIndex++;
     }
@@ -47,6 +54,7 @@ const getAvailablePlots = async (req, res) => {
     );
 
     res.json({
+      graves: result.rows,
       plots: result.rows,
       pagination: {
         page: parseInt(page),

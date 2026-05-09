@@ -157,11 +157,15 @@ export default function GravePlotsPage() {
 
         {/* View Toggle */}
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm text-gray-500">
-            Showing {plots.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0} to{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}{' '}
-            results
-          </p>
+          {pagination.total > 0 ? (
+            <p className="text-sm text-gray-500">
+              Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+              {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}{' '}
+              results
+            </p>
+          ) : (
+            <p className="text-sm text-gray-500">No results found</p>
+          )}
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
@@ -210,8 +214,18 @@ export default function GravePlotsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {plots.map((plot) => (
               <div key={plot.grave_id} className="card relative group">
-                {/* Plot Image Placeholder */}
-                <div className="h-32 bg-gradient-to-br from-[#2D6A4F]/20 to-[#1B3A2D]/20 rounded-lg mb-3 relative">
+                <div className="h-32 rounded-lg mb-3 relative overflow-hidden">
+                  {(plot as any).image_url ? (
+                    <img
+                      src={(plot as any).image_url}
+                      alt={plot.plot_id}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#1B3A2D] flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">{plot.plot_id}</span>
+                    </div>
+                  )}
                   <StatusBadge
                     status={plot.status}
                     className="absolute top-2 right-2"
@@ -273,6 +287,22 @@ export default function GravePlotsPage() {
             </button>
           </div>
         )}
+
+        {/* Family Plot Requests */}
+        <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+          <h3 className="font-semibold text-gray-900 mb-2">Need Multiple Plots?</h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Request family plots or adjacent plots for your loved ones.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/grave-plots/request-family" className="btn-primary">
+              Request Family Plot
+            </Link>
+            <Link href="/grave-plots/request-adjacent" className="btn-secondary">
+              Request Adjacent Plot
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -221,9 +221,19 @@ const updateCaseStatus = async (req, res) => {
       [id, oldStatus, status, req.user.user_id, notes || null]
     );
 
+    const historyResult = await query(
+      `SELECT csh.*, u.full_name as changed_by_name
+       FROM case_status_history csh
+       LEFT JOIN users u ON csh.changed_by_user_id = u.user_id
+       WHERE csh.case_id = $1
+       ORDER BY csh.changed_at DESC`,
+      [id]
+    );
+
     res.json({
       message: 'Case status updated successfully',
-      case: result.rows[0]
+      case: result.rows[0],
+      status_history: historyResult.rows
     });
   } catch (error) {
     console.error('Update case status error:', error);

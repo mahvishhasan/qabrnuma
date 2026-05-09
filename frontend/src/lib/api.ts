@@ -1,8 +1,11 @@
 import axios from 'axios';
 import { getToken, removeToken } from './auth';
 
+const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+console.log('API baseURL:', baseURL);
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+  baseURL,
   headers: {
     'Content-Type': 'application/json',
   },

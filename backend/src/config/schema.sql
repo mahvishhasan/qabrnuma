@@ -1,6 +1,8 @@
 -- QabrNuma Database Schema
 -- PostgreSQL / Neon Serverless
 
+SET client_min_messages = WARNING;
+
 -- Drop tables if exist (in reverse order of dependencies)
 DROP TABLE IF EXISTS case_status_history CASCADE;
 DROP TABLE IF EXISTS funeral_services CASCADE;
@@ -36,10 +38,17 @@ CREATE TABLE cemeteries (
     name VARCHAR(255) NOT NULL,
     address TEXT,
     city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    postal_code VARCHAR(20),
     total_capacity INT DEFAULT 0,
-    available_plots INT DEFAULT 0,
-    status VARCHAR(50) DEFAULT 'active' CHECK (status IN ('active', 'maintenance')),
+    current_occupancy INT DEFAULT 0,
+    contact_phone VARCHAR(20),
+    contact_email VARCHAR(255),
+    is_active BOOLEAN DEFAULT true,
     type VARCHAR(50) CHECK (type IN ('premium', 'heritage', 'standard')),
+    description TEXT,
+    image_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -65,12 +74,13 @@ CREATE TABLE graves (
     section_id INT NOT NULL REFERENCES sections(section_id) ON DELETE CASCADE,
     plot_id VARCHAR(50) UNIQUE NOT NULL,
     plot_type VARCHAR(50) DEFAULT 'standard' CHECK (plot_type IN ('standard', 'family', 'cremation', 'estate')),
-    status VARCHAR(50) DEFAULT 'available' CHECK (status IN ('available', 'reserved', 'occupied')),
+    status VARCHAR(50) DEFAULT 'available' CHECK (status IN ('available', 'reserved', 'occupied', 'maintenance')),
     dimensions VARCHAR(50),
     capacity INT DEFAULT 1,
     premium_tier VARCHAR(50),
     base_price NUMERIC(10,2),
     maintenance_plan VARCHAR(100),
+    image_url TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -172,11 +182,16 @@ CREATE INDEX idx_family_members_group ON family_plot_members(group_id);
 CREATE TABLE funeral_services (
     service_id SERIAL PRIMARY KEY,
     case_id INT NOT NULL REFERENCES death_cases(case_id) ON DELETE CASCADE,
-    service_type VARCHAR(50) NOT NULL CHECK (service_type IN ('ghusl', 'kafan', 'janaza', 'transport', 'other')),
+    service_type VARCHAR(50) NOT NULL CHECK (service_type IN ('ghusl', 'kafan', 'janaza', 'transport', 'grave_prep', 'headstone', 'cleaning', 'perpetual', 'other')),
     scheduled_datetime TIMESTAMPTZ,
+    preferred_datetime TIMESTAMPTZ,
     assigned_staff_id INT REFERENCES users(user_id) ON DELETE SET NULL,
-    status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'in_progress', 'completed')),
+    requested_by_user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+    location VARCHAR(255),
+    price NUMERIC(10,2),
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'scheduled', 'in_progress', 'completed', 'cancelled')),
     notes TEXT,
+    rejection_reason TEXT,
     completed_at TIMESTAMPTZ
 );
 

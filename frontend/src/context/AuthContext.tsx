@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  setUser: (user: User) => void;
 }
 
 interface RegisterData {
@@ -47,11 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    const { token, user: userData } = response.data;
-    setToken(token);
-    saveUser(userData);
-    setUser(userData);
+    console.log('Login attempt:', email);
+    console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      console.log('Login response:', response.data);
+      const { token, user: userData } = response.data;
+      setToken(token);
+      saveUser(userData);
+      setUser(userData);
+    } catch (err) {
+      console.error('Login error:', err);
+      throw err;
+    }
   };
 
   const register = async (data: RegisterData) => {
@@ -68,6 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/login';
   };
 
+  const updateUser = (userData: User) => {
+    setUser(userData);
+    saveUser(userData);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -77,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        setUser: updateUser,
       }}
     >
       {children}

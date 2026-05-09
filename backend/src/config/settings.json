@@ -1,0 +1,7 @@
+{
+  "cemetery_name": "QabrNuma Memorial Gardens",
+  "contact_email": "info@qabrnuma.pk",
+  "default_holding_fee": 250,
+  "notify_on_case_status_change": true,
+  "notify_on_reservation_expiry": true
+}

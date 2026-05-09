@@ -234,6 +234,16 @@ export default function DeathCasesPage() {
                                 )}
                               </p>
                             </div>
+
+                            {/* View Details Link */}
+                            <div className="mt-4 pt-4 border-t border-gray-200">
+                              <Link
+                                href={`/death-cases/${deathCase.case_id}`}
+                                className="text-[#2D6A4F] hover:text-[#245c43] font-medium text-sm"
+                              >
+                                View Full Details →
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       )}

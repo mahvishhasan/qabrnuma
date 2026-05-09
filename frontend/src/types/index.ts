@@ -128,9 +128,14 @@ export interface FuneralService {
   service_type: 'ghusl' | 'kafan' | 'janaza' | 'transport' | 'other';
   scheduled_datetime?: string;
   assigned_staff_id?: number;
-  status: 'scheduled' | 'in_progress' | 'completed';
+  location?: string;
+  status: 'pending' | 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
   notes?: string;
   completed_at?: string;
+  rejection_reason?: string;
+  preferred_datetime?: string;
+  price?: number;
+  requested_by_user_id?: number;
 }
 
 export interface CaseStatusHistory {
