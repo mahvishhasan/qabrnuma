@@ -64,7 +64,7 @@ export default function CreateDeathCasePage() {
       <Header title="Death Cases" subtitle="Create" />
 
       <div className="p-6 lg:p-8">
-        {/* Breadcrumb */}
+        
         <div className="flex items-center gap-2 text-sm mb-6">
           <Link href="/death-cases" className="text-gray-500 hover:text-gray-700">
             Death Cases
@@ -73,7 +73,7 @@ export default function CreateDeathCasePage() {
           <span className="text-gray-900">Create</span>
         </div>
 
-        {/* Page Header */}
+        
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Create Death Case Request</h2>
@@ -85,7 +85,7 @@ export default function CreateDeathCasePage() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Deceased Information Section */}
+          
           <div className="card">
             <div className="flex items-center gap-2 mb-4">
               <UserIcon className="w-5 h-5 text-[#2D6A4F]" />
@@ -161,7 +161,7 @@ export default function CreateDeathCasePage() {
             </div>
           </div>
 
-          {/* Next of Kin Section */}
+          
           <div className="card">
             <div className="flex items-center gap-2 mb-4">
               <UsersIcon className="w-5 h-5 text-[#2D6A4F]" />
@@ -215,7 +215,7 @@ export default function CreateDeathCasePage() {
             </div>
           </div>
 
-          {/* Bottom Bar */}
+          
           <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <InformationCircleIcon className="w-4 h-4" />

@@ -98,7 +98,7 @@ export default function GravePlotsPage() {
       <Header title="Available Plots" />
 
       <div className="p-6 lg:p-8">
-        {/* Filter Bar */}
+        
         <div className="card mb-6">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex-1 min-w-[200px]">
@@ -155,7 +155,7 @@ export default function GravePlotsPage() {
           </div>
         </div>
 
-        {/* View Toggle */}
+        
         <div className="flex items-center justify-between mb-4">
           {pagination.total > 0 ? (
             <p className="text-sm text-gray-500">
@@ -190,7 +190,7 @@ export default function GravePlotsPage() {
           </div>
         </div>
 
-        {/* Results */}
+        
         {viewMode === 'map' ? (
           <div className="card h-96 flex items-center justify-center">
             <div className="text-center text-gray-500">
@@ -255,7 +255,7 @@ export default function GravePlotsPage() {
           </div>
         )}
 
-        {/* Pagination */}
+        
         {pagination.total > pagination.limit && (
           <div className="flex justify-center mt-6 gap-2">
             <button
@@ -288,7 +288,7 @@ export default function GravePlotsPage() {
           </div>
         )}
 
-        {/* Family Plot Requests */}
+        
         <div className="mt-8 p-6 bg-gray-50 rounded-xl">
           <h3 className="font-semibold text-gray-900 mb-2">Need Multiple Plots?</h3>
           <p className="text-sm text-gray-500 mb-4">

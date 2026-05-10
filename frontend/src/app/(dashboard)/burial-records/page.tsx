@@ -27,7 +27,6 @@ export default function BurialRecordsPage() {
   const fetchRecords = async () => {
     setIsLoading(true);
     try {
-      // For user role, we fetch records related to their cases
       const casesRes = await api.get('/death-cases/my-cases?limit=100');
       const cases = casesRes.data.cases || [];
 
@@ -39,7 +38,6 @@ export default function BurialRecordsPage() {
             burialRecords.push(res.data.record);
           }
         } catch {
-          // No burial record for this case
         }
       }
       setRecords(burialRecords);
@@ -62,7 +60,7 @@ export default function BurialRecordsPage() {
       <Header title="Burial Records" />
 
       <div className="p-6 lg:p-8">
-        {/* Search and Filters */}
+        
         <div className="card mb-6">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-[250px] relative">
@@ -88,7 +86,7 @@ export default function BurialRecordsPage() {
           </div>
         </div>
 
-        {/* Records Table */}
+        
         <div className="card">
           {isLoading ? (
             <TableSkeleton rows={5} columns={5} />

@@ -95,7 +95,7 @@ export default function GravePlotDetailPage() {
       <Header title="Grave Plots" subtitle={`Plot ${grave.plot_id}`} />
 
       <div className="p-6 lg:p-8">
-        {/* Breadcrumb */}
+        
         <div className="flex items-center gap-2 text-sm mb-6">
           <Link href="/grave-plots" className="text-gray-500 hover:text-gray-700">
             Grave Plots
@@ -105,9 +105,9 @@ export default function GravePlotDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+          
           <div className="lg:col-span-2 space-y-6">
-            {/* Plot Image */}
+            
             <div className="rounded-xl overflow-hidden" style={{ maxHeight: '240px' }}>
               {grave.image_url ? (
                 <img
@@ -122,7 +122,7 @@ export default function GravePlotDetailPage() {
               )}
             </div>
 
-            {/* Header */}
+            
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3">
@@ -138,7 +138,7 @@ export default function GravePlotDetailPage() {
               </div>
             </div>
 
-            {/* Details Grid */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Plot Details</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -163,7 +163,7 @@ export default function GravePlotDetailPage() {
               </div>
             </div>
 
-            {/* Historical Logs */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Historical & Status Logs</h3>
               <div className="space-y-3">
@@ -191,9 +191,9 @@ export default function GravePlotDetailPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
+          
           <div className="space-y-6">
-            {/* Actions Card */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Management Actions</h3>
               <div className="space-y-3">
@@ -225,7 +225,7 @@ export default function GravePlotDetailPage() {
               </p>
             </div>
 
-            {/* Financial Overview */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Financial Overview</h3>
               <div className="space-y-3">
@@ -254,7 +254,7 @@ export default function GravePlotDetailPage() {
               </div>
             </div>
 
-            {/* Maintenance Info */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Plot Maintenance</h3>
               <p className="text-sm text-gray-600">

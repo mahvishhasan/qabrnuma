@@ -71,7 +71,7 @@ export default function BurialRecordDetailPage() {
       <Header title="Burial Records" />
 
       <div className="p-6 lg:p-8">
-        {/* Back Link */}
+        
         <Link
           href="/burial-records"
           className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
@@ -80,7 +80,7 @@ export default function BurialRecordDetailPage() {
           Back to Records
         </Link>
 
-        {/* Record Header */}
+        
         <div className="flex items-start justify-between mb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -107,9 +107,9 @@ export default function BurialRecordDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+          
           <div className="lg:col-span-2 space-y-6">
-            {/* Service Details */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Service Details</h3>
               <div className="grid grid-cols-2 gap-4">
@@ -150,7 +150,7 @@ export default function BurialRecordDetailPage() {
               )}
             </div>
 
-            {/* Next of Kin */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Next of Kin & Contacts</h3>
               <div className="overflow-x-auto">
@@ -184,9 +184,9 @@ export default function BurialRecordDetailPage() {
             </div>
           </div>
 
-          {/* Sidebar */}
+          
           <div className="space-y-6">
-            {/* Plot Metadata */}
+            
             <div className="card">
               <h3 className="font-semibold text-gray-900 mb-4">Plot Metadata</h3>
               <div className="space-y-3">

@@ -179,7 +179,7 @@ export default function CemeteryDetailPage() {
     <div>
       <Header title="Cemetery Details" />
 
-      {/* Header Banner Image */}
+      
       <div className="relative h-[200px] w-full overflow-hidden">
         {cemetery?.image_url ? (
           <img

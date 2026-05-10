@@ -102,7 +102,7 @@ export default function ReservationsPage() {
       <Header title="Grave Plot Reservations" />
 
       <div className="p-6 lg:p-8">
-        {/* Stat Cards */}
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {statCards.map((stat) => (
             <div key={stat.title} className="card">
@@ -121,7 +121,7 @@ export default function ReservationsPage() {
           ))}
         </div>
 
-        {/* Table Section */}
+        
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Reservation Status</h3>
@@ -215,7 +215,7 @@ export default function ReservationsPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          
           {pagination.total > 0 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
               <p className="text-sm text-gray-500">

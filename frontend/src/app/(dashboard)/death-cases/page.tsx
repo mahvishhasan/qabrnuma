@@ -43,7 +43,6 @@ export default function DeathCasesPage() {
       setCases(res.data.cases || []);
       setPagination(res.data.pagination);
 
-      // Count completed this week
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
       const completed = (res.data.cases || []).filter(
@@ -76,7 +75,6 @@ export default function DeathCasesPage() {
       />
 
       <div className="p-6 lg:p-8">
-        {/* Stats Card */}
         <div className="bg-[#1B3A2D] rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between">
             <div>
@@ -94,7 +92,6 @@ export default function DeathCasesPage() {
           </div>
         </div>
 
-        {/* Table Section */}
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-900">Your Submissions</h3>
@@ -163,7 +160,6 @@ export default function DeathCasesPage() {
                       {expandedCase === deathCase.case_id && (
                         <tr>
                           <td colSpan={5} className="px-4 py-6 bg-gray-50">
-                            {/* Timeline Header */}
                             <div className="flex items-center justify-between mb-4">
                               <h4 className="font-semibold text-gray-900">
                                 Case Tracking Timeline
@@ -176,7 +172,6 @@ export default function DeathCasesPage() {
                               )}
                             </div>
 
-                            {/* Timeline Steps */}
                             <div className="flex items-center justify-between mb-6">
                               {statusSteps.map((step, index) => {
                                 const stepStatus = getStepStatus(deathCase.status, index);
@@ -222,7 +217,7 @@ export default function DeathCasesPage() {
                               })}
                             </div>
 
-                            {/* Latest Update */}
+                            
                             <div className="bg-white border-l-4 border-[#2D6A4F] p-4 rounded-r-lg">
                               <p className="text-xs uppercase tracking-wide text-gray-400 font-medium mb-1">
                                 Latest Update
@@ -235,7 +230,7 @@ export default function DeathCasesPage() {
                               </p>
                             </div>
 
-                            {/* View Details Link */}
+                            
                             <div className="mt-4 pt-4 border-t border-gray-200">
                               <Link
                                 href={`/death-cases/${deathCase.case_id}`}
@@ -254,7 +249,7 @@ export default function DeathCasesPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          
           {pagination.total > 0 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
               <p className="text-sm text-gray-500">
