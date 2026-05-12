@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   BellIcon,
   Cog6ToothIcon,
@@ -37,14 +38,21 @@ export default function Header({ title, subtitle, badge, children }: HeaderProps
       <div className="flex items-center gap-3">
         {children}
 
-        <button className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+        <Link
+          href="/notifications"
+          className="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           <BellIcon className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
+        </Link>
 
-        <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-          <Cog6ToothIcon className="w-5 h-5" />
-        </button>
+        {user?.role === 'admin' && (
+          <Link
+            href="/admin/settings"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Cog6ToothIcon className="w-5 h-5" />
+          </Link>
+        )}
 
         {user && (
           <div className="flex items-center gap-3 pl-3 border-l border-gray-200">

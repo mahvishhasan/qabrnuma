@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/LoadingSkeleton';
 import api from '@/lib/api';
-import { Grave } from '@/types';
+import { Grave, DeathCase } from '@/types';
 import {
   MapPinIcon,
   InformationCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 
 interface GraveDetails extends Grave {
@@ -31,8 +32,14 @@ interface GraveDetails extends Grave {
 
 export default function GravePlotDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const [grave, setGrave] = useState<GraveDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAllocateModal, setShowAllocateModal] = useState(false);
+  const [deathCases, setDeathCases] = useState<DeathCase[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
+  const [isAllocating, setIsAllocating] = useState(false);
+  const [allocateError, setAllocateError] = useState('');
 
   useEffect(() => {
     fetchGrave();
@@ -47,6 +54,47 @@ export default function GravePlotDetailPage() {
       console.error('Failed to fetch grave:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchDeathCases = async () => {
+    try {
+      const res = await api.get('/death-cases/my-cases?limit=100');
+      const eligibleCases = (res.data.cases || []).filter(
+        (c: DeathCase) => c.status === 'approved' || c.status === 'allocated'
+      );
+      setDeathCases(eligibleCases);
+    } catch (error) {
+      console.error('Failed to fetch death cases:', error);
+    }
+  };
+
+  const openAllocateModal = () => {
+    setShowAllocateModal(true);
+    setSelectedCaseId(null);
+    setAllocateError('');
+    fetchDeathCases();
+  };
+
+  const handleAllocate = async () => {
+    if (!selectedCaseId || !grave) return;
+
+    setIsAllocating(true);
+    setAllocateError('');
+
+    try {
+      await api.post('/burial-records', {
+        case_id: selectedCaseId,
+        grave_id: grave.grave_id,
+        burial_type: 'standard',
+        date_of_service: new Date().toISOString().split('T')[0],
+      });
+      setShowAllocateModal(false);
+      router.push('/burial-records');
+    } catch (error: any) {
+      setAllocateError(error.response?.data?.error || 'Failed to allocate plot');
+    } finally {
+      setIsAllocating(false);
     }
   };
 
@@ -205,7 +253,9 @@ export default function GravePlotDetailPage() {
                     >
                       Reserve Plot
                     </Link>
-                    <button className="btn-primary w-full">Allocate to Case</button>
+                    <button onClick={openAllocateModal} className="btn-primary w-full">
+                      Allocate to Case
+                    </button>
                   </>
                 )}
                 {grave.status === 'reserved' && (
@@ -267,6 +317,71 @@ export default function GravePlotDetailPage() {
           </div>
         </div>
       </div>
+
+      {showAllocateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Allocate Plot to Case</h3>
+              <button
+                onClick={() => setShowAllocateModal(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Select a death case to allocate this plot. This will create a burial record
+              and mark the plot as occupied.
+            </p>
+
+            {allocateError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {allocateError}
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="label">Select Death Case</label>
+              {deathCases.length === 0 ? (
+                <p className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                  No eligible death cases found. Cases must be in "approved" or "allocated" status.
+                </p>
+              ) : (
+                <select
+                  value={selectedCaseId || ''}
+                  onChange={(e) => setSelectedCaseId(Number(e.target.value))}
+                  className="input-field"
+                >
+                  <option value="">Choose a case...</option>
+                  {deathCases.map((dc) => (
+                    <option key={dc.case_id} value={dc.case_id}>
+                      {dc.registration_number} - {dc.deceased_name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowAllocateModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAllocate}
+                disabled={!selectedCaseId || isAllocating}
+                className="btn-primary flex-1 disabled:opacity-50"
+              >
+                {isAllocating ? 'Allocating...' : 'Allocate Plot'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
