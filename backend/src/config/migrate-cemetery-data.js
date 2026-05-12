@@ -51,6 +51,22 @@ async function migrateCemeteryData() {
   try {
     console.log('Starting cemetery data migration...\n');
 
+    const addColumnSafe = async (colName, colType) => {
+      try {
+        await client.query(`ALTER TABLE cemeteries ADD COLUMN IF NOT EXISTS ${colName} ${colType}`);
+        console.log(`Added column: ${colName}`);
+      } catch (e) {
+        if (!e.message.includes('already exists')) {
+          console.log(`Note: ${colName} - ${e.message}`);
+        }
+      }
+    };
+
+    console.log('Ensuring required columns exist...');
+    await addColumnSafe('description', 'TEXT');
+    await addColumnSafe('image_url', 'TEXT');
+    console.log('Column check complete.\n');
+
     for (const cemetery of cemeteryData) {
       const existingResult = await client.query(
         'SELECT cemetery_id FROM cemeteries WHERE name = $1',
@@ -63,26 +79,18 @@ async function migrateCemeteryData() {
           `UPDATE cemeteries SET
             address = $1,
             city = $2,
-            state = $3,
-            country = $4,
-            postal_code = $5,
-            total_capacity = $6,
-            contact_phone = $7,
-            contact_email = $8,
-            type = $9,
-            description = $10,
-            image_url = $11
-          WHERE cemetery_id = $12`,
+            total_capacity = $3,
+            contact_phone = $4,
+            contact_email = $5,
+            description = $6,
+            image_url = $7
+          WHERE cemetery_id = $8`,
           [
             cemetery.address,
             cemetery.city,
-            cemetery.state,
-            cemetery.country,
-            cemetery.postal_code,
             cemetery.total_capacity,
             cemetery.contact_phone,
             cemetery.contact_email,
-            cemetery.type,
             cemetery.description,
             cemetery.image_url,
             id
@@ -92,21 +100,16 @@ async function migrateCemeteryData() {
       } else {
         await client.query(
           `INSERT INTO cemeteries (
-            name, address, city, state, country, postal_code,
-            total_capacity, current_occupancy, contact_phone, contact_email,
-            is_active, type, description, image_url
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $8, $9, true, $10, $11, $12)`,
+            name, address, city, total_capacity, current_occupancy,
+            contact_phone, contact_email, is_active, description, image_url
+          ) VALUES ($1, $2, $3, $4, 0, $5, $6, true, $7, $8)`,
           [
             cemetery.name,
             cemetery.address,
             cemetery.city,
-            cemetery.state,
-            cemetery.country,
-            cemetery.postal_code,
             cemetery.total_capacity,
             cemetery.contact_phone,
             cemetery.contact_email,
-            cemetery.type,
             cemetery.description,
             cemetery.image_url
           ]
