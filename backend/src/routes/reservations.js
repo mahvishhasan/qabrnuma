@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { writeLimiter } = require('../middleware/rateLimiter');
 const {
   createReservation,
   getUserReservations,
@@ -14,7 +15,7 @@ const {
 
 router.get('/', authenticate, getUserReservations);
 
-router.post('/', authenticate, createReservation);
+router.post('/', authenticate, writeLimiter, createReservation);
 
 router.post('/family-plot', authenticate, createFamilyPlotGroup);
 

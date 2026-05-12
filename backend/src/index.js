@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+const { generalLimiter, authLimiter } = require('./middleware/rateLimiter');
 const { checkAndExpireReservations } = require('./controllers/reservationController');
 const authRoutes = require('./routes/auth');
 const deathCasesRoutes = require('./routes/deathCases');
@@ -32,6 +33,7 @@ app.use(cors({
   },
   credentials: true
 }));
+app.use(generalLimiter);
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -43,6 +45,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/death-cases', deathCasesRoutes);
 app.use('/api/burial-records', burialRecordsRoutes);

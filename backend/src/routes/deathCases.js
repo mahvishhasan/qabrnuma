@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { writeLimiter } = require('../middleware/rateLimiter');
 const {
   createCase,
   getAllCases,
@@ -11,7 +12,7 @@ const {
 
 router.get('/my-cases', authenticate, getUserCases);
 
-router.post('/', authenticate, createCase);
+router.post('/', authenticate, writeLimiter, createCase);
 
 router.get('/', authenticate, getAllCases);
 
