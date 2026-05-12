@@ -151,6 +151,4 @@ qabrnuma/
 | GET | /api/reservations | List reservations |
 | GET | /api/funeral-services | List funeral services |
 
-## License
 
-MIT
