@@ -1,4 +1,5 @@
 const { pool, query } = require('../config/db');
+const { RESERVATION_EXPIRY_HOURS } = require('../config/constants');
 
 const generateReservationNumber = async () => {
   const year = new Date().getFullYear();
@@ -54,7 +55,7 @@ const createReservation = async (req, res) => {
     }
 
     const reservation_number = await generateReservationNumber();
-    const expiry_date = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const expiry_date = new Date(Date.now() + RESERVATION_EXPIRY_HOURS * 60 * 60 * 1000);
 
     const result = await client.query(
       `INSERT INTO reservations (
@@ -420,7 +421,7 @@ const requestAdjacentPlot = async (req, res) => {
 
     const adjacentGrave = adjacentResult.rows[0];
     const reservation_number = await generateReservationNumber();
-    const expiry_date = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const expiry_date = new Date(Date.now() + RESERVATION_EXPIRY_HOURS * 60 * 60 * 1000);
 
     const reservationResult = await query(
       `INSERT INTO reservations (

@@ -1,4 +1,5 @@
 const { query } = require('../config/db');
+const { GRAVE_STATUSES } = require('../config/constants');
 
 const getAvailablePlots = async (req, res) => {
   try {
@@ -185,8 +186,7 @@ const updateGraveStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['available', 'reserved', 'occupied'];
-    if (!validStatuses.includes(status)) {
+    if (!GRAVE_STATUSES.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 

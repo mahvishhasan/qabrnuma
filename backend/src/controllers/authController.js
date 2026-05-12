@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { query } = require('../config/db');
+const { JWT_EXPIRY, DEFAULT_ROLE } = require('../config/constants');
 
 const register = async (req, res) => {
   try {
@@ -23,9 +24,9 @@ const register = async (req, res) => {
 
     const result = await query(
       `INSERT INTO users (full_name, email, password_hash, phone_number, cnic, role)
-       VALUES ($1, $2, $3, $4, $5, 'user')
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING user_id, full_name, email, role, created_at`,
-      [full_name, email, password_hash, phone_number, cnic]
+      [full_name, email, password_hash, phone_number, cnic, DEFAULT_ROLE]
     );
 
     const user = result.rows[0];
@@ -33,7 +34,7 @@ const register = async (req, res) => {
     const token = jwt.sign(
       { userId: user.user_id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: JWT_EXPIRY }
     );
 
     res.status(201).json({
@@ -74,7 +75,7 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { userId: user.user_id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: JWT_EXPIRY }
     );
 
     res.json({

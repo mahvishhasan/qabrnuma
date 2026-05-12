@@ -1,4 +1,5 @@
 const { query } = require('../config/db');
+const { SERVICE_TYPES, SERVICE_STATUSES, STAFF_STATUS_TRANSITIONS } = require('../config/constants');
 
 const getAllServices = async (req, res) => {
   try {
@@ -97,8 +98,7 @@ const createService = async (req, res) => {
       return res.status(400).json({ error: 'case_id and service_type are required' });
     }
 
-    const validTypes = ['ghusl', 'kafan', 'janaza', 'transport', 'other'];
-    if (!validTypes.includes(service_type.toLowerCase())) {
+    if (!SERVICE_TYPES.includes(service_type.toLowerCase())) {
       return res.status(400).json({ error: 'Invalid service type' });
     }
 
@@ -143,8 +143,8 @@ const updateService = async (req, res) => {
     }
 
     if (status) {
-      const validStatuses = ['scheduled', 'in_progress', 'completed'];
-      if (!validStatuses.includes(status)) {
+      const updateValidStatuses = ['scheduled', 'in_progress', 'completed'];
+      if (!updateValidStatuses.includes(status)) {
         return res.status(400).json({ error: 'Invalid status' });
       }
     }
@@ -359,8 +359,7 @@ const updateServiceStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['pending', 'scheduled', 'in_progress', 'completed', 'cancelled'];
-    if (!validStatuses.includes(status)) {
+    if (!SERVICE_STATUSES.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
@@ -381,12 +380,7 @@ const updateServiceStatus = async (req, res) => {
         return res.status(403).json({ error: 'You can only update your assigned services' });
       }
 
-      const validTransitions = {
-        'scheduled': ['in_progress'],
-        'in_progress': ['completed']
-      };
-
-      if (!validTransitions[currentStatus] || !validTransitions[currentStatus].includes(status)) {
+      if (!STAFF_STATUS_TRANSITIONS[currentStatus] || !STAFF_STATUS_TRANSITIONS[currentStatus].includes(status)) {
         return res.status(400).json({ error: 'Invalid status transition' });
       }
     }

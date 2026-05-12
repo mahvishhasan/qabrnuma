@@ -1,4 +1,5 @@
 const { query } = require('../config/db');
+const { DEATH_CASE_STATUSES } = require('../config/constants');
 
 const generateRegistrationNumber = async () => {
   const year = new Date().getFullYear();
@@ -184,8 +185,7 @@ const updateCaseStatus = async (req, res) => {
     const { id } = req.params;
     const { status, notes, assigned_staff_id } = req.body;
 
-    const validStatuses = ['pending', 'under_review', 'approved', 'allocated', 'completed'];
-    if (!validStatuses.includes(status)) {
+    if (!DEATH_CASE_STATUSES.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 

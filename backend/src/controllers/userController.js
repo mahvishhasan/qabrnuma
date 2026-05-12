@@ -1,4 +1,5 @@
 const { query } = require('../config/db');
+const { ROLES } = require('../config/constants');
 
 const getUsers = async (req, res) => {
   try {
@@ -59,8 +60,7 @@ const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    const validRoles = ['user', 'staff', 'funeral_coordinator', 'cemetery_manager', 'admin'];
-    if (!validRoles.includes(role)) {
+    if (!ROLES.includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
 
