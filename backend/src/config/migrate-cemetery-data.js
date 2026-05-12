@@ -65,6 +65,11 @@ async function migrateCemeteryData() {
     console.log('Ensuring required columns exist...');
     await addColumnSafe('description', 'TEXT');
     await addColumnSafe('image_url', 'TEXT');
+    await addColumnSafe('total_capacity', 'INT DEFAULT 0');
+    await addColumnSafe('current_occupancy', 'INT DEFAULT 0');
+    await addColumnSafe('contact_phone', 'VARCHAR(20)');
+    await addColumnSafe('contact_email', 'VARCHAR(255)');
+    await addColumnSafe('is_active', 'BOOLEAN DEFAULT true');
     console.log('Column check complete.\n');
 
     for (const cemetery of cemeteryData) {
@@ -79,18 +84,12 @@ async function migrateCemeteryData() {
           `UPDATE cemeteries SET
             address = $1,
             city = $2,
-            total_capacity = $3,
-            contact_phone = $4,
-            contact_email = $5,
-            description = $6,
-            image_url = $7
-          WHERE cemetery_id = $8`,
+            description = $3,
+            image_url = $4
+          WHERE cemetery_id = $5`,
           [
             cemetery.address,
             cemetery.city,
-            cemetery.total_capacity,
-            cemetery.contact_phone,
-            cemetery.contact_email,
             cemetery.description,
             cemetery.image_url,
             id
@@ -99,17 +98,12 @@ async function migrateCemeteryData() {
         console.log(`Updated: ${cemetery.name}`);
       } else {
         await client.query(
-          `INSERT INTO cemeteries (
-            name, address, city, total_capacity, current_occupancy,
-            contact_phone, contact_email, is_active, description, image_url
-          ) VALUES ($1, $2, $3, $4, 0, $5, $6, true, $7, $8)`,
+          `INSERT INTO cemeteries (name, address, city, description, image_url)
+           VALUES ($1, $2, $3, $4, $5)`,
           [
             cemetery.name,
             cemetery.address,
             cemetery.city,
-            cemetery.total_capacity,
-            cemetery.contact_phone,
-            cemetery.contact_email,
             cemetery.description,
             cemetery.image_url
           ]
