@@ -1,6 +1,6 @@
-# Qabar Numa - Cemetery Management System
+# Qabar Numa - Your Go-To Platform for Post-Mortem Services
 
-A comprehensive cemetery management system for managing graves, reservations, burial records, and funeral services. Built for Lahore, Pakistan with real cemetery data.
+A comprehensive full-stack system for managing post-mortem related services, A to Z. Built for Lahore, Pakistan with real cemetery data.
 
 ## Tech Stack
 
