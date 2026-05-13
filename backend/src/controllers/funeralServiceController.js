@@ -99,7 +99,7 @@ const createService = async (req, res) => {
     }
 
     if (!SERVICE_TYPES.includes(service_type.toLowerCase())) {
-      return res.status(400).json({ error: 'Invalid service type' });
+      return res.status(400).json({ error: `Invalid service type: ${service_type}` });
     }
 
     const caseResult = await query(
@@ -115,7 +115,14 @@ const createService = async (req, res) => {
       `INSERT INTO funeral_services (case_id, service_type, scheduled_datetime, assigned_staff_id, location, notes, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'scheduled')
        RETURNING *`,
-      [case_id, service_type.toLowerCase(), scheduled_datetime, assigned_staff_id, location, notes]
+      [
+        case_id,
+        service_type.toLowerCase(),
+        scheduled_datetime || null,
+        assigned_staff_id || null,
+        location || null,
+        notes || null
+      ]
     );
 
     res.status(201).json({
@@ -124,7 +131,7 @@ const createService = async (req, res) => {
     });
   } catch (error) {
     console.error('Create service error:', error);
-    res.status(500).json({ error: 'Failed to create service' });
+    res.status(500).json({ error: error.message || 'Failed to create service' });
   }
 };
 

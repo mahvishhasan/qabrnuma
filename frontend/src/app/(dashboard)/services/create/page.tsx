@@ -73,9 +73,12 @@ export default function CreateServicePage() {
 
     try {
       const payload = {
-        ...formData,
         case_id: parseInt(formData.case_id),
+        service_type: formData.service_type,
+        scheduled_datetime: formData.scheduled_datetime || null,
         assigned_staff_id: formData.assigned_staff_id ? parseInt(formData.assigned_staff_id) : null,
+        location: formData.location || null,
+        notes: formData.notes || null,
       };
 
       await api.post('/funeral-services', payload);
