@@ -39,7 +39,7 @@ export default function DeathCasesPage() {
   const fetchCases = async () => {
     setIsLoading(true);
     try {
-      const res = await api.get(`/death-cases/my-cases?page=${pagination.page}&limit=${pagination.limit}`);
+      const res = await api.get(`/death-cases?page=${pagination.page}&limit=${pagination.limit}`);
       setCases(res.data.cases || []);
       setPagination(res.data.pagination);
 
