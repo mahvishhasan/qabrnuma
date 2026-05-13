@@ -6,7 +6,7 @@ const GRAVE_STATUSES = ['available', 'reserved', 'occupied', 'maintenance'];
 
 const RESERVATION_STATUSES = ['pending', 'approved', 'cancelled', 'expired'];
 
-const SERVICE_TYPES = ['ghusl', 'kafan', 'janaza', 'transport', 'other'];
+const SERVICE_TYPES = ['ghusl', 'kafan', 'janaza', 'transport', 'grave_prep', 'headstone', 'cleaning', 'perpetual', 'other'];
 
 const SERVICE_STATUSES = ['pending', 'scheduled', 'in_progress', 'completed', 'cancelled'];
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const {
   createBurialRecord,
+  getAllBurialRecords,
   getBurialRecordById,
   getBurialRecordByCaseId,
   updateBurialRecord,
@@ -10,6 +11,8 @@ const {
 } = require('../controllers/burialRecordController');
 
 router.get('/family-history', authenticate, getFamilyBurialHistory);
+
+router.get('/', authenticate, getAllBurialRecords);
 
 router.post(
   '/',

@@ -242,6 +242,62 @@ const updateBurialRecord = async (req, res) => {
   }
 };
 
+const getAllBurialRecords = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search } = req.query;
+    const offset = (page - 1) * limit;
+    const params = [];
+    let whereClause = '';
+    let paramIndex = 1;
+
+    if (search) {
+      whereClause = `WHERE dc.deceased_name ILIKE $${paramIndex} OR br.record_number ILIKE $${paramIndex}`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    const countResult = await query(
+      `SELECT COUNT(*) FROM burial_records br
+       JOIN death_cases dc ON br.case_id = dc.case_id
+       ${whereClause}`,
+      params
+    );
+    const total = parseInt(countResult.rows[0].count);
+
+    params.push(limit, offset);
+    const result = await query(
+      `SELECT br.*,
+              dc.deceased_name, dc.gender, dc.age, dc.date_of_death,
+              dc.next_of_kin_name, dc.next_of_kin_contact, dc.next_of_kin_relation,
+              g.plot_id, g.plot_type, g.dimensions,
+              s.section_name, s.section_code,
+              c.name as cemetery_name, c.city as cemetery_city
+       FROM burial_records br
+       JOIN death_cases dc ON br.case_id = dc.case_id
+       JOIN graves g ON br.grave_id = g.grave_id
+       JOIN sections s ON g.section_id = s.section_id
+       JOIN cemeteries c ON s.cemetery_id = c.cemetery_id
+       ${whereClause}
+       ORDER BY br.created_at DESC
+       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+      params
+    );
+
+    res.json({
+      records: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Get all burial records error:', error);
+    res.status(500).json({ error: 'Failed to fetch burial records' });
+  }
+};
+
 const getFamilyBurialHistory = async (req, res) => {
   try {
     const { surname } = req.query;
@@ -281,6 +337,7 @@ const getFamilyBurialHistory = async (req, res) => {
 
 module.exports = {
   createBurialRecord,
+  getAllBurialRecords,
   getBurialRecordById,
   getBurialRecordByCaseId,
   updateBurialRecord,

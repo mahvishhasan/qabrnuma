@@ -633,6 +633,10 @@ function CoordinatorServicesView() {
                 <option value="kafan">Kafan</option>
                 <option value="janaza">Janaza</option>
                 <option value="transport">Transport</option>
+                <option value="grave_prep">Grave Prep</option>
+                <option value="headstone">Headstone</option>
+                <option value="cleaning">Cleaning</option>
+                <option value="perpetual">Perpetual Care</option>
                 <option value="other">Other</option>
               </select>
             </div>

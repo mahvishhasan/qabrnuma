@@ -59,7 +59,7 @@ export default function CreateServicePage() {
 
   const fetchStaff = async () => {
     try {
-      const res = await api.get('/users?role=funeral_coordinator');
+      const res = await api.get('/users?role=staff');
       setStaff(res.data.users || []);
     } catch (err) {
       console.error('Failed to fetch staff:', err);
@@ -148,6 +148,10 @@ export default function CreateServicePage() {
                 <option value="kafan">Kafan (Shrouding)</option>
                 <option value="janaza">Janaza (Funeral Prayer)</option>
                 <option value="transport">Transport</option>
+                <option value="grave_prep">Grave Preparation</option>
+                <option value="headstone">Headstone / Memorial Marker</option>
+                <option value="cleaning">Grave Cleaning</option>
+                <option value="perpetual">Perpetual Care</option>
                 <option value="other">Other</option>
               </select>
             </div>

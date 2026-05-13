@@ -27,20 +27,8 @@ export default function BurialRecordsPage() {
   const fetchRecords = async () => {
     setIsLoading(true);
     try {
-      const casesRes = await api.get('/death-cases/my-cases?limit=100');
-      const cases = casesRes.data.cases || [];
-
-      const burialRecords: BurialRecord[] = [];
-      for (const caseItem of cases.filter((c: { status: string }) => c.status === 'completed')) {
-        try {
-          const res = await api.get(`/burial-records/case/${caseItem.case_id}`);
-          if (res.data.record) {
-            burialRecords.push(res.data.record);
-          }
-        } catch {
-        }
-      }
-      setRecords(burialRecords);
+      const res = await api.get('/burial-records?limit=100');
+      setRecords(res.data.records || []);
     } catch (error) {
       console.error('Failed to fetch records:', error);
     } finally {
