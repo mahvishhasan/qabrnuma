@@ -33,7 +33,6 @@ export default function CreateServicePage() {
     service_type: 'ghusl',
     scheduled_datetime: '',
     assigned_staff_id: '',
-    location: '',
     notes: '',
   });
 
@@ -77,7 +76,6 @@ export default function CreateServicePage() {
         service_type: formData.service_type,
         scheduled_datetime: formData.scheduled_datetime || null,
         assigned_staff_id: formData.assigned_staff_id ? parseInt(formData.assigned_staff_id) : null,
-        location: formData.location || null,
         notes: formData.notes || null,
       };
 
@@ -186,18 +184,6 @@ export default function CreateServicePage() {
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="label">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className="input-field"
-                placeholder="e.g., Main Prayer Hall"
-              />
             </div>
 
             <div>

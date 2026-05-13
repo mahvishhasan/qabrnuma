@@ -92,7 +92,7 @@ const getServiceById = async (req, res) => {
 
 const createService = async (req, res) => {
   try {
-    const { case_id, service_type, scheduled_datetime, assigned_staff_id, location, notes } = req.body;
+    const { case_id, service_type, scheduled_datetime, assigned_staff_id, notes } = req.body;
 
     if (!case_id || !service_type) {
       return res.status(400).json({ error: 'case_id and service_type are required' });
@@ -112,15 +112,14 @@ const createService = async (req, res) => {
     }
 
     const result = await query(
-      `INSERT INTO funeral_services (case_id, service_type, scheduled_datetime, assigned_staff_id, location, notes, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'scheduled')
+      `INSERT INTO funeral_services (case_id, service_type, scheduled_datetime, assigned_staff_id, notes, status)
+       VALUES ($1, $2, $3, $4, $5, 'scheduled')
        RETURNING *`,
       [
         case_id,
         service_type.toLowerCase(),
         scheduled_datetime || null,
         assigned_staff_id || null,
-        location || null,
         notes || null
       ]
     );
@@ -138,7 +137,7 @@ const createService = async (req, res) => {
 const updateService = async (req, res) => {
   try {
     const { id } = req.params;
-    const { service_type, scheduled_datetime, assigned_staff_id, location, status, notes } = req.body;
+    const { service_type, scheduled_datetime, assigned_staff_id, status, notes } = req.body;
 
     const existingResult = await query(
       'SELECT * FROM funeral_services WHERE service_id = $1',
@@ -163,13 +162,12 @@ const updateService = async (req, res) => {
         service_type = COALESCE($1, service_type),
         scheduled_datetime = COALESCE($2, scheduled_datetime),
         assigned_staff_id = $3,
-        location = COALESCE($4, location),
-        status = COALESCE($5, status),
-        notes = COALESCE($6, notes),
-        completed_at = $7
-       WHERE service_id = $8
+        status = COALESCE($4, status),
+        notes = COALESCE($5, notes),
+        completed_at = $6
+       WHERE service_id = $7
        RETURNING *`,
-      [service_type, scheduled_datetime, assigned_staff_id, location, status, notes, completedAt, id]
+      [service_type, scheduled_datetime, assigned_staff_id, status, notes, completedAt, id]
     );
 
     res.json({
