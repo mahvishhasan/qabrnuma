@@ -7,13 +7,14 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { TableSkeleton } from '@/components/ui/LoadingSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import api from '@/lib/api';
-import { Reservation } from '@/types';
+import { Reservation, DeathCase } from '@/types';
 import {
   ClipboardDocumentListIcon,
   CheckCircleIcon,
   XCircleIcon,
   CalendarIcon,
   MagnifyingGlassIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -41,9 +42,54 @@ export default function ReservationsPage() {
     pages: 0,
   });
 
+  const [linkModal, setLinkModal] = useState<{ open: boolean; reservationId: number | null }>({
+    open: false,
+    reservationId: null,
+  });
+  const [deathCases, setDeathCases] = useState<DeathCase[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('');
+  const [isLinking, setIsLinking] = useState(false);
+  const [toast, setToast] = useState('');
+
   useEffect(() => {
     fetchReservations();
   }, [pagination.page]);
+
+  const fetchDeathCases = async () => {
+    try {
+      const res = await api.get('/death-cases?status=approved&limit=100');
+      setDeathCases(res.data.cases || []);
+    } catch (err) {
+      console.error('Failed to fetch death cases:', err);
+    }
+  };
+
+  const openLinkModal = (reservationId: number) => {
+    setLinkModal({ open: true, reservationId });
+    setSelectedCaseId('');
+    fetchDeathCases();
+  };
+
+  const handleLinkCase = async () => {
+    if (!linkModal.reservationId || !selectedCaseId) return;
+
+    setIsLinking(true);
+    try {
+      await api.put(`/reservations/${linkModal.reservationId}/link-case`, {
+        case_id: parseInt(selectedCaseId),
+      });
+      setToast('Reservation linked to case successfully');
+      setLinkModal({ open: false, reservationId: null });
+      setSelectedCaseId('');
+      fetchReservations();
+      setTimeout(() => setToast(''), 3000);
+    } catch (err: any) {
+      setToast(err.response?.data?.error || 'Failed to link reservation');
+      setTimeout(() => setToast(''), 3000);
+    } finally {
+      setIsLinking(false);
+    }
+  };
 
   const fetchReservations = async () => {
     setIsLoading(true);
@@ -102,7 +148,14 @@ export default function ReservationsPage() {
       <Header title="Grave Plot Reservations" />
 
       <div className="p-6 lg:p-8">
-        
+        {toast && (
+          <div className={`fixed top-20 right-6 px-4 py-3 rounded-lg shadow-lg z-50 ${
+            toast.includes('Failed') ? 'bg-red-500 text-white' : 'bg-[#2D6A4F] text-white'
+          }`}>
+            {toast}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {statCards.map((stat) => (
             <div key={stat.title} className="card">
@@ -201,7 +254,10 @@ export default function ReservationsPage() {
                                 Cancel
                               </Link>
                               <span className="text-gray-300">|</span>
-                              <button className="text-sm text-[#2D6A4F] hover:text-[#245c43] font-medium">
+                              <button
+                                onClick={() => openLinkModal(reservation.reservation_id)}
+                                className="text-sm text-[#2D6A4F] hover:text-[#245c43] font-medium"
+                              >
                                 Link to Case
                               </button>
                             </div>
@@ -242,6 +298,64 @@ export default function ReservationsPage() {
             </div>
           )}
         </div>
+
+        {linkModal.open && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Link to Death Case</h2>
+                <button
+                  onClick={() => setLinkModal({ open: false, reservationId: null })}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-500 mb-4">
+                Select a death case to link this reservation to. This will associate the reserved plot with the deceased.
+              </p>
+
+              <div className="mb-6">
+                <label className="label">Select Death Case</label>
+                {deathCases.length === 0 ? (
+                  <p className="text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                    No eligible death cases found. Cases must be in "approved" status.
+                  </p>
+                ) : (
+                  <select
+                    value={selectedCaseId}
+                    onChange={(e) => setSelectedCaseId(e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Choose a case...</option>
+                    {deathCases.map((dc) => (
+                      <option key={dc.case_id} value={dc.case_id}>
+                        {dc.registration_number} - {dc.deceased_name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setLinkModal({ open: false, reservationId: null })}
+                  className="btn-secondary flex-1"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLinkCase}
+                  disabled={!selectedCaseId || isLinking}
+                  className="btn-primary flex-1 disabled:opacity-50"
+                >
+                  {isLinking ? 'Linking...' : 'Link Case'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

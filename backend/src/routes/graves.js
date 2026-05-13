@@ -25,7 +25,7 @@ router.post(
 router.put(
   '/:id/status',
   authenticate,
-  authorize('admin', 'cemetery_manager'),
+  authorize('admin', 'cemetery_manager', 'staff'),
   updateGraveStatus
 );
 

@@ -12,7 +12,9 @@ import {
   MapPinIcon,
   InformationCircleIcon,
   XMarkIcon,
+  WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
+import { useAuth } from '@/context/AuthContext';
 
 interface GraveDetails extends Grave {
   cemetery_type?: string;
@@ -33,6 +35,7 @@ interface GraveDetails extends Grave {
 export default function GravePlotDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [grave, setGrave] = useState<GraveDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showAllocateModal, setShowAllocateModal] = useState(false);
@@ -40,6 +43,13 @@ export default function GravePlotDetailPage() {
   const [selectedCaseId, setSelectedCaseId] = useState<number | null>(null);
   const [isAllocating, setIsAllocating] = useState(false);
   const [allocateError, setAllocateError] = useState('');
+
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusError, setStatusError] = useState('');
+
+  const canManagePlots = user?.role === 'admin' || user?.role === 'cemetery_manager' || user?.role === 'staff';
 
   useEffect(() => {
     fetchGrave();
@@ -95,6 +105,29 @@ export default function GravePlotDetailPage() {
       setAllocateError(error.response?.data?.error || 'Failed to allocate plot');
     } finally {
       setIsAllocating(false);
+    }
+  };
+
+  const openStatusModal = () => {
+    setShowStatusModal(true);
+    setNewStatus(grave?.status || '');
+    setStatusError('');
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!grave || !newStatus) return;
+
+    setIsUpdatingStatus(true);
+    setStatusError('');
+
+    try {
+      await api.put(`/graves/${grave.grave_id}/status`, { status: newStatus });
+      setShowStatusModal(false);
+      fetchGrave();
+    } catch (error: any) {
+      setStatusError(error.response?.data?.error || 'Failed to update status');
+    } finally {
+      setIsUpdatingStatus(false);
     }
   };
 
@@ -268,6 +301,15 @@ export default function GravePlotDetailPage() {
                     This plot is occupied.
                   </p>
                 )}
+                {canManagePlots && (
+                  <button
+                    onClick={openStatusModal}
+                    className="btn-secondary w-full flex items-center justify-center gap-2"
+                  >
+                    <WrenchScrewdriverIcon className="w-4 h-4" />
+                    Update Plot Status
+                  </button>
+                )}
               </div>
               <p className="text-xs text-gray-500 mt-3 flex items-start gap-1">
                 <InformationCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -377,6 +419,73 @@ export default function GravePlotDetailPage() {
                 className="btn-primary flex-1 disabled:opacity-50"
               >
                 {isAllocating ? 'Allocating...' : 'Allocate Plot'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showStatusModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Update Plot Status</h3>
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Change the status of this grave plot. Use with caution as this affects availability.
+            </p>
+
+            {statusError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {statusError}
+              </div>
+            )}
+
+            <div className="mb-4">
+              <label className="label">Current Status</label>
+              <p className="text-sm font-medium text-gray-900 capitalize mb-3">
+                {grave?.status}
+              </p>
+
+              <label className="label">New Status</label>
+              <select
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value)}
+                className="input-field"
+              >
+                <option value="available">Available</option>
+                <option value="reserved">Reserved</option>
+                <option value="occupied">Occupied</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+              <p className="text-sm text-amber-700">
+                <strong>Warning:</strong> Changing status manually may affect linked reservations or burial records.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowStatusModal(false)}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateStatus}
+                disabled={!newStatus || newStatus === grave?.status || isUpdatingStatus}
+                className="btn-primary flex-1 disabled:opacity-50"
+              >
+                {isUpdatingStatus ? 'Updating...' : 'Update Status'}
               </button>
             </div>
           </div>
